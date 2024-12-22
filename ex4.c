@@ -112,9 +112,137 @@ float task2HumanPyramid(int col ,int row,float arr[5][9])
     return task2HumanPyramid(col+1,row+1,arr)/2 + task2HumanPyramid(col-1,row+1,arr)/2 + arr[row][col];
 }
 
-int task3ParenthesisValidator()
+char getpernatesis(char c) {
+    switch (c) {
+    case '(': return c;
+    case ')': return ')';
+    case '[': return '[';
+    case ']': return ']';
+    case '<': return '<';
+    case '>': return '>';
+    case '{': return '{';
+    case '}': return '}';
+    case '\n': return '\n';
+    default: return 0;
+    }
+}
+char getopositesis(char c) {
+    switch (c) {
+    case '(': return ')';
+    case '[': return ']';
+    case '<': return '>';
+    case '{': return '}';
+    default: return 0;
+    }
+}
+
+int task3ParenthesisValidator(char open)
 {
     // Todo
+    char current;
+    if (scanf("%c", &current) != 1 || current == '\n') {
+        if (open != '\0') {
+            return 1;
+        }
+        return 0;
+    }
+    if (getpernatesis(current) == 0) {
+        return task3ParenthesisValidator(open);
+    }
+    if (current == '(' || current == '[' || current == '{' || current == '<') {
+        if (task3ParenthesisValidator(current) == 1) {
+            return 1;
+        }
+        return task3ParenthesisValidator(open);
+    }
+
+    if (current == ')' || current == ']' || current == '}' || current == '>') {
+        if (open == '\0' || getopositesis(open) != current) {
+            return 1;
+        }
+        return 0;
+    }
+    return 1;
+}
+
+int colorIsOccupied(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size],int xRow,int xCol)
+{
+    if (currentRow >= xRow)
+        return 0;
+    if(arr[currentRow][currentCol] == arr[xRow][xCol] && queensArr[currentRow][currentCol] == 'X')
+        return 1;
+    if(currentCol >= size-1)
+     return colorIsOccupied(size,arr,currentRow+1,0,queensArr,xRow,xCol);
+    return colorIsOccupied(size, arr, currentRow, currentCol + 1, queensArr, xRow, xCol);
+}
+
+int columnIsOccupied(int size,int currentRow,char queensArr[size][size],int xRow,int xCol)
+{
+    if (currentRow >= xRow)
+        return 0;
+    if(queensArr[currentRow][xCol] == 'X')
+        return 1;
+    return columnIsOccupied(size,currentRow+1,queensArr,xRow, xCol);
+}
+
+int isLinkedTo(int size,char queensArr[size][size],int xRow,int xCol)
+{
+    if(xRow == 0)
+        return 0;
+    if(queensArr[xRow-1][xCol-1] == 'X' || queensArr[xRow-1][xCol] == 'X' || queensArr[xRow-1][xCol+1] == 'X')
+        return 1;
+    return 0;
+}
+
+int properQueenPlace(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size],int xRow,int xCol)
+{
+    if(isLinkedTo(size,queensArr,xRow,xCol) || colorIsOccupied(size,arr,currentRow,currentCol,queensArr,xRow,xCol) || columnIsOccupied(size,currentRow,queensArr,xRow,xCol))
+        return 0;
+    return 1;
+}
+
+int queenColumn(int size,int xRow,int currentCol ,char queensArr[size][size])
+{
+    if (queensArr[xRow-1][currentCol] == 'X')
+        return currentCol+1;
+      return queenColumn(size,xRow,currentCol+1,queensArr);
+}
+
+int rowIsEmpty(int size,int xRow,int currentCol,char queensArr[size][size])
+{
+    if (queensArr[xRow][currentCol] == 'X')
+        return 1;
+    if (currentCol >= size)
+        return 0;
+    return rowIsEmpty(size,xRow,currentCol+1,queensArr);
+}
+
+int theFuckingThing(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size])
+{
+    if (currentRow >= size)
+        return 1;
+    //
+    if(currentCol>=size)
+    {
+        if(currentRow == 0 && rowIsEmpty(size,currentRow,0,queensArr))
+            return 0;
+       if(rowIsEmpty(size,currentRow,0,queensArr))
+       {
+           int newCol = queenColumn(size, currentRow, 0, queensArr);
+           queensArr[currentRow-1][newCol-1] = '*';
+           return theFuckingThing(size,arr,currentRow-1,newCol,queensArr);
+       }
+        if(!rowIsEmpty(size,currentRow,0,queensArr))
+           return theFuckingThing(size,arr,currentRow+1,currentCol,queensArr);
+    }
+    //
+    if(properQueenPlace(size,arr,0,0,queensArr,currentRow,currentCol))
+    {
+        queensArr[currentRow][currentCol] = 'X';
+        return theFuckingThing(size,arr,currentRow+1,0 ,queensArr);
+    }
+    //
+      return theFuckingThing(size,arr,currentRow,currentCol+1,queensArr);
 }
 
 void task4QueensBattle()
