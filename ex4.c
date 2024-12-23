@@ -1,14 +1,14 @@
 /******************
-Name:
-ID:
-Assignment:
+Name: Amit Rothschild
+ID: 322317637
+Assignment: EX4
 *******************/
 #include <stdio.h>
 #include <string.h>
 
 int task1RobotPaths(int,int);
-float task2HumanPyramid();
-int task3ParenthesisValidator();
+float task2HumanPyramid(int,int,float[5][9]);
+int task3ParenthesisValidator(char);
 void task4QueensBattle();
 void task5CrosswordGenerator();
 
@@ -73,7 +73,9 @@ int main()
                 }
                 break;
             case 3:
-                task3ParenthesisValidator();
+                char c;
+                scanf("%c",&c);
+                task3ParenthesisValidator(c);
                 break;
             case 4:
                 task4QueensBattle();
@@ -165,6 +167,7 @@ int task3ParenthesisValidator(char open)
     return 1;
 }
 
+
 int colorIsOccupied(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size],int xRow,int xCol)
 {
     if (currentRow >= xRow)
@@ -211,9 +214,9 @@ int queenColumn(int size,int xRow,int currentCol ,char queensArr[size][size])
 int rowIsEmpty(int size,int xRow,int currentCol,char queensArr[size][size])
 {
     if (queensArr[xRow][currentCol] == 'X')
-        return 1;
-    if (currentCol >= size)
         return 0;
+    if (currentCol >= size)
+        return 1;
     return rowIsEmpty(size,xRow,currentCol+1,queensArr);
 }
 
