@@ -253,6 +253,124 @@ void task4QueensBattle()
     // Todo
 }
 
+int slotIsEmpty(int arrSize,char arr[arrSize][arrSize],int row,int col,char direction)
+{
+    if(arr[row][col]== '#')
+        return 0; //הבעיה שאם גלשו לשם אותיות נוספות שמכסות את כל הסלוט זה יצא תקין למרות שהמילה שם לא מהמילון, מה שכן לדעתי זה יסתדר עם התנאים הנוספים
+    if (direction == 'H')
+    {
+        if (col >= arrSize)
+            return 0;
+        if (arr[row][col] == '0')
+            return 1;
+        return slotIsEmpty(arrSize,arr,row,col+1,direction);
+    }
+    if (direction == 'V')
+    {
+        if (row >= arrSize)
+            return 0;
+        if (arr[row][col] == '0')
+            return 1;
+        return slotIsEmpty(arrSize,arr,row+1,col,direction);
+    }
+}
+
+int haveMutualLetters(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol
+    ,int numOfWords,int wordRow,char dictionary[numOfWords][15])
+{
+    if(direction == 'H')
+    {
+        if (curCol >= gridSize || grid[curRow][curCol] == '#')
+            return 1;
+        if (grid[curRow][curCol] != '0')
+        {
+            if (grid[curRow][curCol] == dictionary[wordRow][curCol])
+                return haveMutualLetters(gridSize,direction,grid,curRow,curCol+1,numOfWords,wordRow,dictionary);
+            if (grid[curRow][curCol] != dictionary[wordRow][curCol])
+                return 0;
+        }
+    }
+    if(direction == 'V')
+    {
+        if (curRow >= gridSize || grid[curRow][curCol] == '#')
+            return 1;
+        if (grid[curRow][curCol] != '0')
+        {
+            if (grid[curRow][curCol] == dictionary[wordRow][curRow])
+                return haveMutualLetters(gridSize,direction,grid,curRow+1,curCol,numOfWords,wordRow,dictionary);
+            if (grid[curRow][curCol] != dictionary[wordRow][curRow])
+                return 0;
+        }
+    }
+}
+
+int wordSizeCounter(int numOfWords,int wordRow,char dictionary[numOfWords][15],int counter)
+{
+    if(dictionary[wordRow][counter] == '0' || counter == 15)
+        return counter;
+    wordSizeCounter(numOfWords,wordRow,dictionary,counter+1);
+}
+
+int isTheSameSize(int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots])
+{
+    if(slotDetails[3][slotNum]==wordSize)
+        return 1;
+    return 0;
+}
+
+int canBeInserted(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol,int numOfWords,
+    int wordRow,char dictionary[numOfWords][15],int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots])
+{
+    if(isTheSameSize(wordSize,numOfSlots,slotNum,slotDetails)&&
+        haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary))
+        return 1;
+    return 0;
+}
+
+void enterWordInSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
+    int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15])
+{
+    if(direction == 'H')
+    {
+        if (slotDetails[1][slotNum]+counter >= gridSize ||
+        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] == '#')
+            return;
+        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] = dictionary[wordRow][counter];
+        enterWordInSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+    }
+    if(direction == 'V')
+    {
+        if (slotDetails[0][slotNum]+counter >= gridSize ||
+        grid[slotDetails[0][slotNum+counter]][slotDetails[1][slotNum]] == '#')
+            return;
+        grid[slotDetails[0][slotNum]+counter][slotDetails[1][slotNum]] = dictionary[wordRow][counter];
+        enterWordInSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+    }
+}
+
+void deleteWordFromSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
+    int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15])
+{
+    if(direction == 'H')
+    {
+        if (slotDetails[1][slotNum]+counter >= gridSize ||
+        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] == '#')
+            return;
+        if()//letter doesnt belong to other slot
+        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] = '0';
+        deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+    }
+    if(direction == 'V')
+    {
+        if (slotDetails[0][slotNum]+counter >= gridSize ||
+        grid[slotDetails[0][slotNum+counter]][slotDetails[1][slotNum]] == '#')
+            return;
+        if()//letter doesnt belong to other slot
+        grid[slotDetails[0][slotNum]+counter][slotDetails[1][slotNum]] = '0';
+        deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+    }
+}
+
 void task5CrosswordGenerator()
 {
     // Todo
