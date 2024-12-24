@@ -220,7 +220,7 @@ int rowIsEmpty(int size,int xRow,int currentCol,char queensArr[size][size])
     return rowIsEmpty(size,xRow,currentCol+1,queensArr);
 }
 
-int theFuckingThing(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size])
+int task4QueensBattle(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size])
 {
     if (currentRow >= size)
         return 1;
@@ -233,145 +233,284 @@ int theFuckingThing(int size,char arr[size][size],int currentRow,int currentCol 
        {
            int newCol = queenColumn(size, currentRow, 0, queensArr);
            queensArr[currentRow-1][newCol-1] = '*';
-           return theFuckingThing(size,arr,currentRow-1,newCol,queensArr);
+           return task4QueensBattle(size,arr,currentRow-1,newCol,queensArr);
        }
         if(!rowIsEmpty(size,currentRow,0,queensArr))
-           return theFuckingThing(size,arr,currentRow+1,currentCol,queensArr);
+           return task4QueensBattle(size,arr,currentRow+1,currentCol,queensArr);
     }
     //
     if(properQueenPlace(size,arr,0,0,queensArr,currentRow,currentCol))
     {
         queensArr[currentRow][currentCol] = 'X';
-        return theFuckingThing(size,arr,currentRow+1,0 ,queensArr);
+        return task4QueensBattle(size,arr,currentRow+1,0 ,queensArr);
     }
     //
-      return theFuckingThing(size,arr,currentRow,currentCol+1,queensArr);
+      return task4QueensBattle(size,arr,currentRow,currentCol+1,queensArr);
 }
 
-void task4QueensBattle()
+/*--------------------------------------------------------------------------------------------------------------------*/
+
+void makeItMinus(int size,int arr[size][size],int currentRow,int currentCol)
 {
-    // Todo
+    if (currentRow >= size)
+        return;
+    if(currentCol >= size)
+    {
+        makeItMinus(size,arr,currentRow+1,0);
+        return;
+    }
+    arr[currentRow][currentCol] = -1;
+    makeItMinus(size,arr,currentRow,currentCol+1);
 }
+
 
 int slotIsEmpty(int arrSize,char arr[arrSize][arrSize],int row,int col,char direction)
 {
+    if (row >= arrSize || col >= arrSize)
+        return 0;
     if(arr[row][col]== '#')
         return 0; //הבעיה שאם גלשו לשם אותיות נוספות שמכסות את כל הסלוט זה יצא תקין למרות שהמילה שם לא מהמילון, מה שכן לדעתי זה יסתדר עם התנאים הנוספים
     if (direction == 'H')
     {
-        if (col >= arrSize)
-            return 0;
         if (arr[row][col] == '0')
             return 1;
         return slotIsEmpty(arrSize,arr,row,col+1,direction);
     }
     if (direction == 'V')
     {
-        if (row >= arrSize)
-            return 0;
         if (arr[row][col] == '0')
             return 1;
         return slotIsEmpty(arrSize,arr,row+1,col,direction);
     }
+    return 1;
 }
 
 int haveMutualLetters(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol
-    ,int numOfWords,int wordRow,char dictionary[numOfWords][15])
+    ,int numOfWords,int wordRow,char dictionary[numOfWords][15],int count)
 {
     if(direction == 'H')
     {
-        if (curCol >= gridSize || grid[curRow][curCol] == '#')
+        if (curCol+count >= gridSize || grid[curRow][curCol+count] == '#')
             return 1;
-        if (grid[curRow][curCol] != '0')
+        if (grid[curRow][curCol+count] != '0')
         {
-            if (grid[curRow][curCol] == dictionary[wordRow][curCol])
-                return haveMutualLetters(gridSize,direction,grid,curRow,curCol+1,numOfWords,wordRow,dictionary);
-            if (grid[curRow][curCol] != dictionary[wordRow][curCol])
+            if (grid[curRow][curCol+count] == dictionary[wordRow][count])
+                return haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,count+1);
+            if (grid[curRow][curCol+count] != dictionary[wordRow][count])
                 return 0;
         }
+        return haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,count+1);
     }
     if(direction == 'V')
     {
-        if (curRow >= gridSize || grid[curRow][curCol] == '#')
+        if (curRow+count >= gridSize || grid[curRow+count][curCol] == '#')
             return 1;
-        if (grid[curRow][curCol] != '0')
+        if (grid[curRow+count][curCol] != '0')
         {
-            if (grid[curRow][curCol] == dictionary[wordRow][curRow])
-                return haveMutualLetters(gridSize,direction,grid,curRow+1,curCol,numOfWords,wordRow,dictionary);
-            if (grid[curRow][curCol] != dictionary[wordRow][curRow])
+            if (grid[curRow+count][curCol] == dictionary[wordRow][count])
+                return haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,count+1);
+            if (grid[curRow+count][curCol] != dictionary[wordRow][count])
+            {
+                printf("dictionary bad letter - %c | grid bad letter - %c\n",dictionary[wordRow][curCol],grid[curRow][curCol]);
                 return 0;
+            }
         }
+        return haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,count+1);
     }
+    return 1;
 }
 
 int wordSizeCounter(int numOfWords,int wordRow,char dictionary[numOfWords][15],int counter)
 {
     if(dictionary[wordRow][counter] == '0' || counter == 15)
         return counter;
-    wordSizeCounter(numOfWords,wordRow,dictionary,counter+1);
+    return wordSizeCounter(numOfWords,wordRow,dictionary,counter+1);
 }
 
 int isTheSameSize(int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots])
 {
-    if(slotDetails[3][slotNum]==wordSize)
+    if(slotDetails[2][slotNum]==wordSize)
         return 1;
     return 0;
 }
 
-int canBeInserted(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol,int numOfWords,
-    int wordRow,char dictionary[numOfWords][15],int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots])
+int wordIsUsed(int counter,int numOfSlots,int wordNum,int wordInSlot[numOfSlots])
 {
+    if(counter >= numOfSlots)
+        return 0;
+    if(wordInSlot[counter]==wordNum)
+        return 1;
+    return wordIsUsed(counter+1,numOfSlots,wordNum,wordInSlot);
+}
+
+
+int canBeInserted(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol,int numOfWords,
+    int wordRow,char dictionary[numOfWords][15],int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots],
+    int wordInSlot[numOfSlots])
+{
+    if(!isTheSameSize(wordSize,numOfSlots,slotNum,slotDetails))
+printf("Not the same size\n");//**********************************************************************************************
+    if(!haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,0))
+        printf("Not the same letters\n");//************************************************************************************
+    if (wordIsUsed(0,numOfSlots,wordRow,wordInSlot))
+        printf("Word is used\n");//*****************************************************************************************
     if(isTheSameSize(wordSize,numOfSlots,slotNum,slotDetails)&&
-        haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary))
+        haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,0)&&
+        !wordIsUsed(0,numOfSlots,wordRow,wordInSlot))
         return 1;
     return 0;
 }
 
 void enterWordInSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
-    int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15])
+    int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15],
+    int slotGrid[gridSize][gridSize],int wordInSlot[numOfSlots])
 {
+    int row = slotDetails[0][slotNum];
+    int col = slotDetails[1][slotNum];
     if(direction == 'H')
     {
-        if (slotDetails[1][slotNum]+counter >= gridSize ||
-        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] == '#')
+        if (col+counter >= gridSize ||
+        grid[row][col+counter] == '#')
             return;
-        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] = dictionary[wordRow][counter];
-        enterWordInSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+        if (grid[row][col+counter] == '0')
+        {
+            grid[row][col+counter] = dictionary[wordRow][counter];
+            printf("entered - now its %c\n ",grid[row][col+counter]);//*********************************************
+            slotGrid[row][col+counter] = slotNum;
+            wordInSlot[slotNum] = wordRow;
+        }
+        enterWordInSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary,slotGrid,wordInSlot);
     }
     if(direction == 'V')
     {
-        if (slotDetails[0][slotNum]+counter >= gridSize ||
-        grid[slotDetails[0][slotNum+counter]][slotDetails[1][slotNum]] == '#')
+        if (row+counter >= gridSize ||
+        grid[row+counter][col] == '#')
             return;
-        grid[slotDetails[0][slotNum]+counter][slotDetails[1][slotNum]] = dictionary[wordRow][counter];
-        enterWordInSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+        if(grid[row+counter][col] == '0')
+        {
+            grid[row+counter][col] = dictionary[wordRow][counter];
+            printf("entered - now its %c\n ",grid[row+counter][col]);//*********************************************
+
+            slotGrid[row+counter][col] = slotNum;
+            wordInSlot[slotNum] = wordRow;
+        }
+        enterWordInSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary,slotGrid,wordInSlot);
     }
 }
 
 void deleteWordFromSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
-    int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15])
+    int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15],
+    int slotGrid[gridSize][gridSize],int wordInSlot[numOfSlots])
 {
+    printf("we arrived to the delete part\n");//*************************************************************************888
+    int row = slotDetails[0][slotNum];
+    int col = slotDetails[1][slotNum];
     if(direction == 'H')
     {
-        if (slotDetails[1][slotNum]+counter >= gridSize ||
-        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] == '#')
+        if (col+counter >= gridSize ||
+        grid[row][col+counter] == '#')
             return;
-        if()//letter doesnt belong to other slot
-        grid[slotDetails[0][slotNum]][slotDetails[1][slotNum]+counter] = '0';
-        deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+        if(slotGrid[row][col+counter] == slotNum)
+        {
+            //letter doesnt belong to other slot
+            grid[row][col+counter] = '0';
+            slotGrid[row][col+counter] = -1;
+            printf("delete - now its %c\n ",grid[row][col+counter]);//***********************************************
+            wordInSlot[slotNum] = -1;
+        }
+        deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary,slotGrid,wordInSlot);
     }
     if(direction == 'V')
     {
-        if (slotDetails[0][slotNum]+counter >= gridSize ||
-        grid[slotDetails[0][slotNum+counter]][slotDetails[1][slotNum]] == '#')
+        if (row+counter >= gridSize ||
+        grid[row+counter][col] == '#')
             return;
-        if()//letter doesnt belong to other slot
-        grid[slotDetails[0][slotNum]+counter][slotDetails[1][slotNum]] = '0';
-        deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary);
+        if(slotGrid[row+counter][col] == slotNum)//letter doesnt belong to other slot
+        {
+            grid[row+counter][col] = '0';
+            slotGrid[row+counter][col] = -1;
+            printf("delete - now its %c\n ",grid[row+counter][col]);//***********************************************
+            wordInSlot[slotNum] = -1;
+        }
+        deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,
+            wordRow,dictionary,slotGrid,wordInSlot);
     }
 }
 
-void task5CrosswordGenerator()
+
+int task5CrosswordGenerator(int gridSize, char mainGrid[gridSize][gridSize], int slotGrid[gridSize][gridSize],
+                            int numOfWords, int wordNum, char dictionary[numOfWords][15], int numOfSlots,
+                            int slotNum, char slotDirections[numOfSlots], int slotDetails[3][numOfSlots],
+                            int wordInSlot[numOfSlots])
 {
-    // Todo
+    for(int i=0;i<10;i++)
+    {
+        for(int j=0;j<10;j++)
+            printf("| %c ",mainGrid[i][j]);
+        printf("|\n");
+    }
+    printf("\n\n");
+    for(int i=0;i<10;i++)
+    {
+        for(int j=0;j<10;j++)
+            printf("| %d ",slotGrid[i][j]);
+        printf("|\n");
+    }
+    printf("Debug: slotNum=%d, wordNum=%d\n", slotNum, wordNum);
+
+    // תנאי עצירה: כל הסלוטים מלאים
+    if (slotNum >= numOfSlots)
+        return 1;
+
+    // אם כל המילים נבדקו ואין התאמה
+    if (wordNum >= numOfWords)
+    {
+        printf("No more words to check for slotNum=%d\n", slotNum);//********************************************************
+
+        // בדיקת מילוי חלקי וגלישה אחורה
+        if (slotIsEmpty(gridSize, mainGrid, slotDetails[0][slotNum], slotDetails[1][slotNum], slotDirections[slotNum]))
+        {
+            printf("Slot is empty for slotNum=%d. Backtracking...\n", slotNum);//************************************************
+
+            if (slotNum == 0)
+            {
+                printf("Backtracking failed. Cannot go back further.\n");//********************************************************
+
+                return 0; // לא ניתן לגלוש אחורה יותר
+            }
+
+            // מחיקת מילה מהסלוט הקודם ונסיון מילוי מחדש
+            int newWord = wordInSlot[slotNum-1]+1;
+            deleteWordFromSlot(0, gridSize, mainGrid, numOfSlots, slotNum - 1, slotDetails, slotDirections[slotNum - 1],
+                               numOfWords, wordInSlot[slotNum - 1], dictionary, slotGrid, wordInSlot);
+            return task5CrosswordGenerator(gridSize, mainGrid, slotGrid, numOfWords, newWord,
+                                           dictionary, numOfSlots, slotNum - 1, slotDirections, slotDetails, wordInSlot);
+        }
+        return 0; // לא נמצאה התאמה
+    }
+    // חישוב גודל המילה הנוכחית
+    int wordSize = wordSizeCounter(numOfWords, wordNum, dictionary, 0);
+    printf("Trying word '%s' (size=%d) in slotNum=%d\n", dictionary[wordNum], wordSize, slotNum);//**********************************************
+
+    // בדיקת אפשרות להכניס את המילה לסלוט
+    if (canBeInserted(gridSize, slotDirections[slotNum], mainGrid, slotDetails[0][slotNum], slotDetails[1][slotNum],
+                      numOfWords, wordNum, dictionary, wordSize, numOfSlots, slotNum, slotDetails, wordInSlot))
+    {
+        printf("Word '%s' fits in slotNum=%d. Inserting...\n", dictionary[wordNum], slotNum);//***************************************************88
+
+        // הכנסת המילה
+        enterWordInSlot(0, gridSize, mainGrid, numOfSlots, slotNum, slotDetails, slotDirections[slotNum], numOfWords,
+                        wordNum, dictionary, slotGrid, wordInSlot);
+
+        // מעבר לסלוט הבא
+        return task5CrosswordGenerator(gridSize, mainGrid, slotGrid, numOfWords, 0, dictionary, numOfSlots, slotNum + 1,
+                                       slotDirections, slotDetails, wordInSlot);
+    }
+    printf("Word '%s' does not fit in slotNum=%d. Trying next word...\n", dictionary[wordNum], slotNum);//******************************************
+
+
+    // ניסיון עם המילה הבאה
+    return task5CrosswordGenerator(gridSize, mainGrid, slotGrid, numOfWords, wordNum + 1, dictionary, numOfSlots,
+                                   slotNum, slotDirections, slotDetails, wordInSlot);
 }
+
