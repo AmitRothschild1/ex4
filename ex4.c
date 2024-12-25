@@ -23,6 +23,27 @@ int queenColumn(int size,int xRow,int currentCol ,char queensArr[size][size]);
 int rowIsEmpty(int size,int xRow,int currentCol,char queensArr[size][size]);
 int task4QueensBattle(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size]);
 /*--------------------------------------------------------------------------------------------------------------------*/
+void wordInSlotIsMinus(int numOfSlots,int arr[numOfSlots],int currentCol);
+void mainGridZeroStart(int gridSize,int numOfSlots,int slotsDetails[3][numOfSlots],char mainGrid[gridSize][gridSize],int slotNum,int counter,char direction[numOfSlots]);
+void mainGridLadderStart(int gridSize,int row,int col,char mainGrid[gridSize][gridSize]);
+void getWordInput(int numOfWords,char dictionary[numOfWords][15],int row,int col);
+void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int currentCol);
+void makeItZero(int numOfWords,char dictionary[numOfWords][15],int currentRow,int currentCol);
+int slotIsEmpty(int arrSize,char arr[arrSize][arrSize],int row,int col,char direction);
+int haveMutualLetters(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol
+       ,int numOfWords,int wordRow,char dictionary[numOfWords][15],int count);
+int wordSizeCounter(int numOfWords,int wordRow,char dictionary[numOfWords][15],int counter);
+int isTheSameSize(int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots]);
+int wordIsUsed(int counter,int numOfSlots,int wordNum,int wordInSlot[numOfSlots]);
+int canBeInserted(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol,int numOfWords,
+       int wordRow,char dictionary[numOfWords][15],int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots],
+       int wordInSlot[numOfSlots]);
+void enterWordInSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
+       int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15],
+       int slotGrid[gridSize][gridSize],int wordInSlot[numOfSlots]);
+void deleteWordFromSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
+        int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15],
+        int slotGrid[gridSize][gridSize],int wordInSlot[numOfSlots]);
 int task5CrosswordGenerator(int gridSize, char mainGrid[gridSize][gridSize], int slotGrid[gridSize][gridSize],
                             int numOfWords, int wordNum, char dictionary[numOfWords][15], int numOfSlots,
                             int slotNum, char slotDirections[numOfSlots], int slotDetails[3][numOfSlots],
@@ -131,7 +152,57 @@ int main()
                     break;
                 }
             case 5:
-               // task5CrosswordGenerator();
+                {
+                    int gridSize,numOfSlots,numOfWords;
+                    printf("Please enter the dimensions of the crossword grid:\n");
+                    scanf("%d", &gridSize);
+                    printf("Please enter the number of slots in the crossword:\n");
+                    scanf("%d", &numOfSlots);
+                    char mainGrid[gridSize][gridSize];
+                    int slotGrid[gridSize][gridSize];
+                    int slotDetails[3][numOfSlots];
+                    char directions[numOfSlots];
+                    printf("Please enter the details for each slot (Row, Column, Length, Direction):\n");
+                    for(int i=0;i<numOfSlots;i++)
+                    {
+                        scanf("%d %d %d %c",&slotDetails[0][i],&slotDetails[1][i],&slotDetails[2][i],&directions[i]);
+                    }
+                    makeItMinus(gridSize,gridSize,slotGrid,0,0);
+                    mainGridLadderStart(gridSize,0,0,mainGrid);
+                    mainGridZeroStart(gridSize,numOfSlots,slotDetails,mainGrid,0,0,directions);
+                    printf("Please enter the number of words in the dictionary:\n");
+                    scanf("%d", &numOfWords);
+                    while(numOfWords<numOfSlots)
+                    {
+                        printf("The dictionary must contain at least 8 words. Please enter a valid dictionary size:\n");
+                        scanf("%d", &numOfWords);
+                    }
+                    char dictionary[numOfWords][15];
+                    int wordInSlot[numOfSlots];
+                    wordInSlotIsMinus(numOfSlots,wordInSlot,0);
+                    makeItZero(numOfWords,dictionary,0,0);
+                    printf("Please enter the words for the dictionary:\n");
+                    for(int i=0;i<=numOfWords;i++)
+                    {
+                        getWordInput(numOfWords,dictionary,i-1,0);//******************************
+                    }
+                    for(int i=0;i<numOfWords;i++)
+                    {
+                        for(int j=0;j<15;j++)
+                            printf("%c",dictionary[i][j]);
+                        printf("\n");
+                    }
+
+                    if(task5CrosswordGenerator(gridSize,mainGrid,slotGrid,numOfWords,0,dictionary,numOfSlots,0,directions,slotDetails,wordInSlot))
+                        for(int i=0;i<gridSize;i++)
+                        {
+                            for(int j=0;j<gridSize;j++)
+                                printf("| %c ",mainGrid[i][j]);
+                            printf("|\n");
+                        }
+                    else
+                            printf("This crossword cannot be solved.\n");
+                }
                 break;
             default:
                 printf("Please choose a task number from the list.\n");
@@ -280,6 +351,57 @@ int task4QueensBattle(int size,char arr[size][size],int currentRow,int currentCo
         return task4QueensBattle(size,arr,currentRow,currentCol+1,queensArr);
     }
 /*Task-5--------------------------------------------------------------------------------------------------------------*/
+void wordInSlotIsMinus(int numOfSlots,int arr[numOfSlots],int currentCol)
+{
+    if (currentCol >= numOfSlots)
+        return;
+    arr[currentCol] = -1;
+    wordInSlotIsMinus(numOfSlots,arr,currentCol+1);
+}
+void mainGridZeroStart(int gridSize,int numOfSlots,int slotsDetails[3][numOfSlots],char mainGrid[gridSize][gridSize],int slotNum,int counter,char direction[numOfSlots])
+{
+    if(slotNum>=numOfSlots)
+        return;
+    int row = slotsDetails[0][slotNum];
+    int col = slotsDetails[1][slotNum];
+    int length = slotsDetails[2][slotNum];
+    if(counter>length-1)
+    {
+        mainGridZeroStart(gridSize,numOfSlots,slotsDetails,mainGrid,slotNum+1,0,direction);
+        return;
+    }
+    if(direction[slotNum]=='H')
+    {
+        mainGrid[row][col+counter] = '0';
+        mainGridZeroStart(gridSize,numOfSlots,slotsDetails,mainGrid,slotNum,counter+1,direction);
+    }
+    if(direction[slotNum]=='V')
+    {
+        mainGrid[row+counter][col] = '0';
+        mainGridZeroStart(gridSize,numOfSlots,slotsDetails,mainGrid,slotNum,counter+1,direction);
+    }
+}
+void mainGridLadderStart(int gridSize,int row,int col,char mainGrid[gridSize][gridSize])
+{
+    if(row>=gridSize)
+        return;
+    if(col>=gridSize)
+    {
+        mainGridLadderStart(gridSize,row+1,0,mainGrid);
+        return;
+    }
+        mainGrid[row][col] = '#';
+    mainGridLadderStart(gridSize,row,col+1,mainGrid);
+}
+void getWordInput(int numOfWords,char dictionary[numOfWords][15],int row,int col)
+{
+    char input;
+    scanf("%c", &input);
+    if(input == '\n')
+        return;
+    dictionary[row][col] = input;
+    getWordInput(numOfWords,dictionary,row,col+1);
+}//********************8
 void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int currentCol)
 {
     if (currentRow >= rows)
@@ -292,7 +414,7 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
     arr[currentRow][currentCol] = -1;
     makeItMinus(rows,cols,arr,currentRow,currentCol+1);
 }
-    void makeItZero(int numOfWords,char dictionary[numOfWords][15],int currentRow,int currentCol)
+void makeItZero(int numOfWords,char dictionary[numOfWords][15],int currentRow,int currentCol)
     {
         if (currentRow >= numOfWords)
             return;
@@ -304,8 +426,7 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
         dictionary[currentRow][currentCol] = '0';
         makeItZero(numOfWords,dictionary,currentRow,currentCol+1);
     }
-
-    int slotIsEmpty(int arrSize,char arr[arrSize][arrSize],int row,int col,char direction)
+int slotIsEmpty(int arrSize,char arr[arrSize][arrSize],int row,int col,char direction)
     {
         if (row >= arrSize || col >= arrSize)
             return 0;
@@ -325,8 +446,7 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
         }
         return 1;
     }
-
-    int haveMutualLetters(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol
+int haveMutualLetters(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol
         ,int numOfWords,int wordRow,char dictionary[numOfWords][15],int count)
     {
         if(direction == 'H')
@@ -360,22 +480,19 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
         }
         return 1;
     }
-
-    int wordSizeCounter(int numOfWords,int wordRow,char dictionary[numOfWords][15],int counter)
+int wordSizeCounter(int numOfWords,int wordRow,char dictionary[numOfWords][15],int counter)
     {
         if(dictionary[wordRow][counter] == '0' || counter == 15)
             return counter;
         return wordSizeCounter(numOfWords,wordRow,dictionary,counter+1);
     }
-
-    int isTheSameSize(int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots])
+int isTheSameSize(int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots])
     {
         if(slotDetails[2][slotNum]==wordSize)
             return 1;
         return 0;
     }
-
-    int wordIsUsed(int counter,int numOfSlots,int wordNum,int wordInSlot[numOfSlots])
+int wordIsUsed(int counter,int numOfSlots,int wordNum,int wordInSlot[numOfSlots])
     {
         if(counter >= numOfSlots)
             return 0;
@@ -383,26 +500,23 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
             return 1;
         return wordIsUsed(counter+1,numOfSlots,wordNum,wordInSlot);
     }
-
-
-    int canBeInserted(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol,int numOfWords,
+int canBeInserted(int gridSize,char direction,char grid[gridSize][gridSize],int curRow,int curCol,int numOfWords,
         int wordRow,char dictionary[numOfWords][15],int wordSize,int numOfSlots,int slotNum,int slotDetails[3][numOfSlots],
         int wordInSlot[numOfSlots])
     {
         if(!isTheSameSize(wordSize,numOfSlots,slotNum,slotDetails))
-            printf("Not the same size\n");//**********************************************************************************************
+         //   printf("Not the same size\n");//**********************************************************************************************
         if(!haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,0))
-            printf("Not the same letters\n");//************************************************************************************
+          //  printf("Not the same letters\n");//************************************************************************************
         if (wordIsUsed(0,numOfSlots,wordRow,wordInSlot))
-            printf("Word is used\n");//*****************************************************************************************
+          //  printf("Word is used\n");//*****************************************************************************************
         if(isTheSameSize(wordSize,numOfSlots,slotNum,slotDetails)&&
             haveMutualLetters(gridSize,direction,grid,curRow,curCol,numOfWords,wordRow,dictionary,0)&&
             !wordIsUsed(0,numOfSlots,wordRow,wordInSlot))
             return 1;
         return 0;
     }
-
-    void enterWordInSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
+void enterWordInSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
         int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15],
         int slotGrid[gridSize][gridSize],int wordInSlot[numOfSlots])
     {
@@ -416,7 +530,7 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
             if (grid[row][col+counter] == '0')
             {
                 grid[row][col+counter] = dictionary[wordRow][counter];
-                printf("entered - now its %c\n ",grid[row][col+counter]);//*********************************************
+               // printf("entered - now its %c\n ",grid[row][col+counter]);//*********************************************
                 slotGrid[row][col+counter] = slotNum;
                 wordInSlot[slotNum] = wordRow;
             }
@@ -430,7 +544,7 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
             if(grid[row+counter][col] == '0')
             {
                 grid[row+counter][col] = dictionary[wordRow][counter];
-                printf("entered - now its %c\n ",grid[row+counter][col]);//*********************************************
+               // printf("entered - now its %c\n ",grid[row+counter][col]);//*********************************************
 
                 slotGrid[row+counter][col] = slotNum;
                 wordInSlot[slotNum] = wordRow;
@@ -438,12 +552,11 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
             enterWordInSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary,slotGrid,wordInSlot);
         }
     }
-
-    void deleteWordFromSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
+void deleteWordFromSlot(int counter,int gridSize,char grid[gridSize][gridSize],int numOfSlots,int slotNum,
         int slotDetails[3][numOfSlots],char direction,int numOfWords,int wordRow,char dictionary[numOfWords][15],
         int slotGrid[gridSize][gridSize],int wordInSlot[numOfSlots])
     {
-        printf("we arrived to the delete part\n");//*************************************************************************888
+      //  printf("we arrived to the delete part\n");//*************************************************************************888
         int row = slotDetails[0][slotNum];
         int col = slotDetails[1][slotNum];
         if(direction == 'H')
@@ -456,7 +569,7 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
                 //letter doesnt belong to other slot
                 grid[row][col+counter] = '0';
                 slotGrid[row][col+counter] = -1;
-                printf("delete - now its %c\n ",grid[row][col+counter]);//***********************************************
+               // printf("delete - now its %c\n ",grid[row][col+counter]);//***********************************************
                 wordInSlot[slotNum] = -1;
             }
             deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,wordRow,dictionary,slotGrid,wordInSlot);
@@ -470,16 +583,14 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
             {
                 grid[row+counter][col] = '0';
                 slotGrid[row+counter][col] = -1;
-                printf("delete - now its %c\n ",grid[row+counter][col]);//***********************************************
+              //  printf("delete - now its %c\n ",grid[row+counter][col]);//***********************************************
                 wordInSlot[slotNum] = -1;
             }
             deleteWordFromSlot(counter+1,gridSize,grid,numOfSlots,slotNum,slotDetails,direction,numOfWords,
                 wordRow,dictionary,slotGrid,wordInSlot);
         }
     }
-
-
-    int task5CrosswordGenerator(int gridSize, char mainGrid[gridSize][gridSize], int slotGrid[gridSize][gridSize],
+int task5CrosswordGenerator(int gridSize, char mainGrid[gridSize][gridSize], int slotGrid[gridSize][gridSize],
                                 int numOfWords, int wordNum, char dictionary[numOfWords][15], int numOfSlots,
                                 int slotNum, char slotDirections[numOfSlots], int slotDetails[3][numOfSlots],
                                 int wordInSlot[numOfSlots])
@@ -506,16 +617,16 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
         // אם כל המילים נבדקו ואין התאמה
         if (wordNum >= numOfWords)
         {
-            printf("No more words to check for slotNum=%d\n", slotNum);//********************************************************
+           // printf("No more words to check for slotNum=%d\n", slotNum);//********************************************************
 
             // בדיקת מילוי חלקי וגלישה אחורה
             if (slotIsEmpty(gridSize, mainGrid, slotDetails[0][slotNum], slotDetails[1][slotNum], slotDirections[slotNum]))
             {
-                printf("Slot is empty for slotNum=%d. Backtracking...\n", slotNum);//************************************************
+              //  printf("Slot is empty for slotNum=%d. Backtracking...\n", slotNum);//************************************************
 
                 if (slotNum == 0)
                 {
-                    printf("Backtracking failed. Cannot go back further.\n");//********************************************************
+                    //printf("Backtracking failed. Cannot go back further.\n");//********************************************************
 
                     return 0; // לא ניתן לגלוש אחורה יותר
                 }
@@ -531,13 +642,13 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
         }
         // חישוב גודל המילה הנוכחית
         int wordSize = wordSizeCounter(numOfWords, wordNum, dictionary, 0);
-        printf("Trying word '%s' (size=%d) in slotNum=%d\n", dictionary[wordNum], wordSize, slotNum);//**********************************************
+       // printf("Trying word '%s' (size=%d) in slotNum=%d\n", dictionary[wordNum], wordSize, slotNum);//**********************************************
 
         // בדיקת אפשרות להכניס את המילה לסלוט
         if (canBeInserted(gridSize, slotDirections[slotNum], mainGrid, slotDetails[0][slotNum], slotDetails[1][slotNum],
                           numOfWords, wordNum, dictionary, wordSize, numOfSlots, slotNum, slotDetails, wordInSlot))
         {
-            printf("Word '%s' fits in slotNum=%d. Inserting...\n", dictionary[wordNum], slotNum);//***************************************************88
+          //  printf("Word '%s' fits in slotNum=%d. Inserting...\n", dictionary[wordNum], slotNum);//***************************************************88
 
             // הכנסת המילה
             enterWordInSlot(0, gridSize, mainGrid, numOfSlots, slotNum, slotDetails, slotDirections[slotNum], numOfWords,
@@ -547,7 +658,7 @@ void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int curren
             return task5CrosswordGenerator(gridSize, mainGrid, slotGrid, numOfWords, 0, dictionary, numOfSlots, slotNum + 1,
                                            slotDirections, slotDetails, wordInSlot);
         }
-        printf("Word '%s' does not fit in slotNum=%d. Trying next word...\n", dictionary[wordNum], slotNum);//******************************************
+      //  printf("Word '%s' does not fit in slotNum=%d. Trying next word...\n", dictionary[wordNum], slotNum);//******************************************
 
 
         // ניסיון עם המילה הבאה
