@@ -5,10 +5,24 @@ Assignment: EX4
 *******************/
 #include <stdio.h>
 #include <string.h>
+/*--------------------------------------------------------------------------------------------------------------------*/
 int task1RobotPaths(int col ,int row);
+/*--------------------------------------------------------------------------------------------------------------------*/
 float task2HumanPyramid(int curCol ,int curRow,float pyramid[5][5]);
+/*--------------------------------------------------------------------------------------------------------------------*/
 int task3ParenthesisValidator(int block,int square,int circle,int triangle);
+/*--------------------------------------------------------------------------------------------------------------------*/
+void makeItAsterisk(int size,char queensBoard[size][size],int currentRow,int currentCol);
+int colorIsOccupied(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size],
+    int xRow,int xCol);
+int columnIsOccupied(int size,int currentRow,char queensArr[size][size],int xRow,int xCol);
+int isLinkedTo(int size,char queensArr[size][size],int xRow,int xCol);
+int properQueenPlace(int size,char arr[size][size],int currentRow,int currentCol ,
+char queensArr[size][size],int xRow,int xCol);
+int queenColumn(int size,int xRow,int currentCol ,char queensArr[size][size]);
+int rowIsEmpty(int size,int xRow,int currentCol,char queensArr[size][size]);
 int task4QueensBattle(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size]);
+/*--------------------------------------------------------------------------------------------------------------------*/
 int task5CrosswordGenerator(int gridSize, char mainGrid[gridSize][gridSize], int slotGrid[gridSize][gridSize],
                             int numOfWords, int wordNum, char dictionary[numOfWords][15], int numOfSlots,
                             int slotNum, char slotDirections[numOfSlots], int slotDetails[3][numOfSlots],
@@ -38,7 +52,8 @@ int main()
                 int column , row;
                 printf("Please enter the coordinates of the robot (column, row):\n");
                 scanf("%d %d",&column,&row);
-                printf("The total number of paths the robot can take to reach home is: %d\n",task1RobotPaths(column,row));
+                printf("The total number of paths the robot can take to reach home is: %d\n",
+                    task1RobotPaths(column,row));
                 break;
             case 2:
                 int negativeCheck=0;
@@ -87,13 +102,34 @@ int main()
                     printf("The parentheses are not balanced correctly.\n");
                 break;
             case 4:
-                int boardSize;
-                printf("Please enter the board dimensions:\n");
-                scanf("%d",&boardSize);
-                printf("Please enter the %d*%d puzzle board\n",boardSize,boardSize);
-
-              //  task4QueensBattle();
-                break;
+                {
+                    int boardSize;
+                    printf("Please enter the board dimensions:\n");
+                    scanf("%d",&boardSize);
+                    char areasBoard[boardSize][boardSize];
+                    printf("Please enter the %d*%d puzzle board\n",boardSize,boardSize);
+                    for(int i=0;i<boardSize;i++)
+                    {
+                        for(int j=0;j<boardSize;j++)
+                            scanf(" %c" ,&areasBoard[i][j]);
+                    }
+                    char queensBoard[boardSize][boardSize];
+                    makeItAsterisk(boardSize,queensBoard,0,0);
+                    if(task4QueensBattle(boardSize,areasBoard,0,0,queensBoard))
+                    {
+                        printf("Solution:\n");
+                        for(int i=0;i<boardSize;i++)
+                        {
+                            for(int j=0;j<boardSize;j++)
+                                printf("%c ",queensBoard[i][j]);
+                            printf("\n");
+                        }
+                    }
+                    else
+                            printf("This puzzle cannot be solved.\n");
+                    scanf("%*[^\n]"); //cleans input buffer
+                    break;
+                }
             case 5:
                // task5CrosswordGenerator();
                 break;
@@ -109,7 +145,7 @@ int main()
 
     } while (task != 6);
 }
-
+/*Task-1--------------------------------------------------------------------------------------------------------------*/
 int task1RobotPaths(int col ,int row)
 {
     // Todo
@@ -119,23 +155,15 @@ int task1RobotPaths(int col ,int row)
         return 0;
     return task1RobotPaths(col - 1,row) + task1RobotPaths(col,row - 1);
 }
-/*--------------------------------------------------------------------------------------------------------------------*/
+/*Task-2--------------------------------------------------------------------------------------------------------------*/
 float task2HumanPyramid(int curCol ,int curRow,float pyramid[5][5])
 {
     // Todo
     if(curCol>curRow||curCol<0||curRow<0)
         return 0;
     return task2HumanPyramid(curCol,curRow-1,pyramid)/2 + task2HumanPyramid(curCol-1,curRow-1,pyramid)/2 + pyramid[curRow][curCol];
-    /*
-    if(col-row < 0 || col+row > 8)
-        return 0;
-    return task2HumanPyramid(col+1,row+1,arr)/2 + task2HumanPyramid(col-1,row+1,arr)/2 + arr[row][col];
-    */
 }
-
-/*--------------------------------------------------------------------------------------------------------------------*/
-
-
+/*Task-3--------------------------------------------------------------------------------------------------------------*/
 int task3ParenthesisValidator(int block,int square,int circle,int triangle)
 {
     char input;
@@ -162,10 +190,21 @@ int task3ParenthesisValidator(int block,int square,int circle,int triangle)
         }
         return task3ParenthesisValidator(block,square,circle,triangle);
 }
-
-/*--------------------------------------------------------------------------------------------------------------------*/
-
-    int colorIsOccupied(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size],int xRow,int xCol)
+/*Task-4--------------------------------------------------------------------------------------------------------------*/
+void makeItAsterisk(int size,char queensBoard[size][size],int currentRow,int currentCol)
+{
+    if (currentRow >= size)
+        return;
+    if(currentCol >= size)
+    {
+        makeItAsterisk(size,queensBoard,currentRow+1,0);
+        return;
+    }
+    queensBoard[currentRow][currentCol] = '*';
+    makeItAsterisk(size,queensBoard,currentRow,currentCol+1);
+}
+int colorIsOccupied(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size],
+    int xRow,int xCol)
     {
         if (currentRow >= xRow)
             return 0;
@@ -175,8 +214,7 @@ int task3ParenthesisValidator(int block,int square,int circle,int triangle)
             return colorIsOccupied(size,arr,currentRow+1,0,queensArr,xRow,xCol);
         return colorIsOccupied(size, arr, currentRow, currentCol + 1, queensArr, xRow, xCol);
     }
-
-    int columnIsOccupied(int size,int currentRow,char queensArr[size][size],int xRow,int xCol)
+int columnIsOccupied(int size,int currentRow,char queensArr[size][size],int xRow,int xCol)
     {
         if (currentRow >= xRow)
             return 0;
@@ -184,8 +222,7 @@ int task3ParenthesisValidator(int block,int square,int circle,int triangle)
             return 1;
         return columnIsOccupied(size,currentRow+1,queensArr,xRow, xCol);
     }
-
-    int isLinkedTo(int size,char queensArr[size][size],int xRow,int xCol)
+int isLinkedTo(int size,char queensArr[size][size],int xRow,int xCol)
     {
         if(xRow == 0)
             return 0;
@@ -193,24 +230,21 @@ int task3ParenthesisValidator(int block,int square,int circle,int triangle)
             return 1;
         return 0;
     }
-
-    int properQueenPlace(int size,char arr[size][size],int currentRow,int currentCol ,
-        char queensArr[size][size],int xRow,int xCol)
+int properQueenPlace(int size,char arr[size][size],int currentRow,int currentCol ,
+char queensArr[size][size],int xRow,int xCol)
     {
         if(isLinkedTo(size,queensArr,xRow,xCol) || colorIsOccupied(size,arr,currentRow,currentCol,queensArr,xRow,xCol)||
             columnIsOccupied(size,currentRow,queensArr,xRow,xCol))
             return 0;
         return 1;
     }
-
-    int queenColumn(int size,int xRow,int currentCol ,char queensArr[size][size])
+int queenColumn(int size,int xRow,int currentCol ,char queensArr[size][size])
     {
         if (queensArr[xRow-1][currentCol] == 'X')
             return currentCol+1;
         return queenColumn(size,xRow,currentCol+1,queensArr);
     }
-
-    int rowIsEmpty(int size,int xRow,int currentCol,char queensArr[size][size])
+int rowIsEmpty(int size,int xRow,int currentCol,char queensArr[size][size])
     {
         if (queensArr[xRow][currentCol] == 'X')
             return 0;
@@ -218,8 +252,7 @@ int task3ParenthesisValidator(int block,int square,int circle,int triangle)
             return 1;
         return rowIsEmpty(size,xRow,currentCol+1,queensArr);
     }
-
-    int task4QueensBattle(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size])
+int task4QueensBattle(int size,char arr[size][size],int currentRow,int currentCol ,char queensArr[size][size])
     {
         if (currentRow >= size)
             return 1;
@@ -246,22 +279,19 @@ int task3ParenthesisValidator(int block,int square,int circle,int triangle)
         //
         return task4QueensBattle(size,arr,currentRow,currentCol+1,queensArr);
     }
-
-/*--------------------------------------------------------------------------------------------------------------------*/
-
-    void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int currentCol)
+/*Task-5--------------------------------------------------------------------------------------------------------------*/
+void makeItMinus(int rows,int cols,int arr[rows][cols],int currentRow,int currentCol)
+{
+    if (currentRow >= rows)
+        return;
+    if(currentCol >= cols)
     {
-        if (currentRow >= rows)
-            return;
-        if(currentCol >= cols)
-        {
-            makeItMinus(rows,cols,arr,currentRow+1,0);
-            return;
-        }
-        arr[currentRow][currentCol] = -1;
-        makeItMinus(rows,cols,arr,currentRow,currentCol+1);
+        makeItMinus(rows,cols,arr,currentRow+1,0);
+        return;
     }
-
+    arr[currentRow][currentCol] = -1;
+    makeItMinus(rows,cols,arr,currentRow,currentCol+1);
+}
     void makeItZero(int numOfWords,char dictionary[numOfWords][15],int currentRow,int currentCol)
     {
         if (currentRow >= numOfWords)
